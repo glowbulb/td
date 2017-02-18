@@ -4,8 +4,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define CURRENT_KEYS 4
+
 // CREATE TABLE ninja (frame INT PRIMARY KEY, id INT xpos INT, ypos INT, life INT);
 // INSERT INTO ninja VALUES(1, 1, 10, 10, 100);
+
+// CREATE TABLE input (frame INT PRIMARY KEY, b1 INT, b2 INT, b3 INT, b4 INT);
+// INSERT INTO input VALUES(1, 04, 00, 00, 00);
+
+// CREATE TABLE input_lookup (hash INT PRIMARY KEY, motion INT);
+// INSERT INTO input_lookup VALUES(1000, 02);
 
 sqlite3 *db;
 char *err_msg = 0;
@@ -17,6 +25,73 @@ struct ninja_t {
     int ypos;
     int life;
 };
+
+enum motion_t {
+    NONE = 0,
+    STAND = 1,
+    WALK_RIGHT = 2,
+    WALK_LEFT = 3,
+    RUN_RIGHT = 4,
+    RUN_LEFT = 5,
+    BUMP_RIGHT = 6,
+    BUMP_LEFT = 7
+};
+
+enum input_t {
+    NO = 0,
+    UP = 1,
+    DOWN = 10,
+    LEFT = 100,
+    RIGHT = 1000,
+    A = 10000,
+    B = 100000
+};
+
+void ninja(){
+
+}
+
+int input_hash(enum input_t *a){
+    int b = 0;
+    for(int i = 0; i < CURRENT_KEYS; i++){
+        b += a[i];
+    }
+    return b;
+}
+
+enum motion_t input_translate(int a){
+    char *q = "";
+    asprintf(&q,"SELECT * FROM input_lookup WHERE hash = %d", a);
+    sqlite3_stmt *r;
+    sqlite3_open("td.db", &db);
+    sqlite3_prepare_v2(db, q, -1, &r, 0);
+    sqlite3_step(r);
+    enum motion_t e = sqlite3_column_int(r, 1);
+    sqlite3_finalize(r);
+    sqlite3_close(db);
+    return e;
+}
+
+int input_select(int a){
+    char *q = "";
+    asprintf(&q,"SELECT * FROM input WHERE frame = %d", a);
+    sqlite3_stmt *r;
+    sqlite3_open("td.db", &db);
+    sqlite3_prepare_v2(db, q, -1, &r, 0);
+    sqlite3_step(r);
+    static enum input_t e[CURRENT_KEYS];
+    for(int i = 0; i < CURRENT_KEYS; i++){
+        e[i] = sqlite3_column_int(r, i + 1);
+    }
+    sqlite3_finalize(r);
+    sqlite3_close(db);
+    return input_hash(e);
+}
+
+void ninja_move(enum motion_t a){
+    if(a == WALK_RIGHT){
+    }
+}
 
 void ninja_store_length(struct ninja_t *a, int b){
     memcpy(a - 8, &b, 8);
