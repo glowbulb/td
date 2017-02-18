@@ -1,16 +1,19 @@
+#pragma once
 #define _GNU_SOURCE
 #include <sqlite3.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "db.h"
+#include "render.h"
 
 #define CURRENT_KEYS 4
 
 // CREATE TABLE ninja (frame INT PRIMARY KEY, id INT xpos INT, ypos INT, life INT);
 // INSERT INTO ninja VALUES(1, 1, 10, 10, 100);
 
-// CREATE TABLE input (frame INT PRIMARY KEY, b1 INT, b2 INT, b3 INT, b4 INT);
-// INSERT INTO input VALUES(1, 04, 00, 00, 00);
+// CREATE TABLE input (frame INT PRIMARY KEY, hash INT);
+// INSERT INTO input VALUES(1, 1000);
 
 // CREATE TABLE input_lookup (hash INT PRIMARY KEY, motion INT);
 // INSERT INTO input_lookup VALUES(1000, 02);
@@ -47,50 +50,17 @@ enum input_t {
     B = 100000
 };
 
-void ninja(){
-
-}
-
-int input_hash(enum input_t *a){
-    int b = 0;
-    for(int i = 0; i < CURRENT_KEYS; i++){
-        b += a[i];
-    }
-    return b;
-}
-
-enum motion_t input_translate(int a){
+enum motion_t input_motion(int a){
     char *q = "";
-    asprintf(&q,"SELECT * FROM input_lookup WHERE hash = %d", a);
+    asprintf(&q,"select input_lookup.motion from input inner join input_lookup on input.hash = input_lookup.hash where frame = %d;", a);
     sqlite3_stmt *r;
     sqlite3_open("td.db", &db);
     sqlite3_prepare_v2(db, q, -1, &r, 0);
     sqlite3_step(r);
-    enum motion_t e = sqlite3_column_int(r, 1);
+    enum motion_t e = sqlite3_column_int(r, 0);
     sqlite3_finalize(r);
     sqlite3_close(db);
     return e;
-}
-
-int input_select(int a){
-    char *q = "";
-    asprintf(&q,"SELECT * FROM input WHERE frame = %d", a);
-    sqlite3_stmt *r;
-    sqlite3_open("td.db", &db);
-    sqlite3_prepare_v2(db, q, -1, &r, 0);
-    sqlite3_step(r);
-    static enum input_t e[CURRENT_KEYS];
-    for(int i = 0; i < CURRENT_KEYS; i++){
-        e[i] = sqlite3_column_int(r, i + 1);
-    }
-    sqlite3_finalize(r);
-    sqlite3_close(db);
-    return input_hash(e);
-}
-
-void ninja_move(enum motion_t a){
-    if(a == WALK_RIGHT){
-    }
 }
 
 void ninja_store_length(struct ninja_t *a, int b){
@@ -135,15 +105,37 @@ struct ninja_t * ninja_return(char *a){
     return e;
 }
 
-char * ninja_insert(struct ninja_t *a, int b){
+int input_hash(enum input_t *a){
+    int b = 0;
+    for(int i = 0; i < CURRENT_KEYS; i++){
+        b += a[i];
+    }
+    return b;
+}
+
+char * ninja_insert_array(struct ninja_t *a){
     char *x = "";
-    for (int i = 0; i < b; i++) {
+    for (int i = 0; i < ninja_get_length(a); i++) {
         char *z;
-        asprintf(&z,"INSERT INTO monsters VALUES(%d, %d, %d, %d, %d);", a[i].frame, a[i].id, a[i].xpos, a[i].ypos, a[i].life);
+        asprintf(&z,"INSERT INTO ninja VALUES(%d, %d, %d, %d, %d);", a[i].frame, a[i].id, a[i].xpos, a[i].ypos, a[i].life);
         asprintf(&x,"%s%s", x, z);
         free(z);
     }
     return x;
+}
+
+char * ninja_insert(struct ninja_t a){
+    char *x;
+    asprintf(&x, "INSERT INTO ninja VALUES(%d, %d, %d, %d, %d);", a.frame, a.id, a.xpos, a.ypos, a.life);
+    return x;
+}
+
+void ninja_move(struct ninja_t a, enum motion_t b){
+    if(b == WALK_RIGHT){
+        a.frame += 1;
+        a.xpos += 10;
+        ninja_insert(a);
+    }
 }
 
 char * ninja_create(){
@@ -155,4 +147,17 @@ char * ninja_create(){
 char * ninja_select_all(){
     char *z = "SELECT * FROM ninja;";
     return z;
+}
+
+char * ninja_select_frame(int a){
+    char *z;
+    asprintf(&z,"SELECT * FROM ninja WHERE frame = %d;", a);
+    return z;
+}
+
+void ninja(int a){
+    struct ninja_t *b = ninja_return(ninja_select_frame(a));
+    for(int i = 0; i < ninja_get_length(b); i++){
+        ninja_move(b[i], input_motion(a));
+    }
 }
