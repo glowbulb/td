@@ -2,10 +2,9 @@
 #include <sqlite3.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h>
 #include <string.h>
 
-// create table ninja (frame integer PRIMARY KEY, id integer, xpos integer, ypos integer, life integer);
+// CREATE TABLE ninja (frame INT PRIMARY KEY, id INT xpos INT, ypos INT, life INT);
 // insert into ninja values(1, 1, 10, 10, 100);
 
 sqlite3 *db;
@@ -39,20 +38,7 @@ void ninja_print(struct ninja_t a){
     printf("%d %d %d %d %d\n", a.frame, a.id, a.xpos, a.ypos, a.life);
 }
 
-int db_callback(void *a, int argc, char **argv, char **azColName) {
-    for (int i = 0; i < argc; i++) {
-        printf("%s = %s\n", azColName[i], argv[i]);
-    }
-    return 0;
-}
-
-void db_query(char *q) {
-    sqlite3_open(":memory:", &db);
-    sqlite3_exec(db, q, db_callback, 0, &err_msg);
-    sqlite3_close(db);
-}
-
-struct ninja_t * db_select_ninja(char *a){
+struct ninja_t * db_return_ninja(char *a){
     sqlite3_stmt *r;
     int i = 0;
     sqlite3_open("td.db", &db);
@@ -87,36 +73,11 @@ char * db_insert_ninja(struct ninja_t *a, int b){
 
 char * db_create_ninja(){
     char *z;
-    asprintf(&z,"CREATE TABLE monsters(name TEXT, life INT, xpos INT, ypos INT);");
+    asprintf(&z,"CREATE TABLE ninja (frame INT PRIMARY KEY, id INT xpos INT, ypos INT, life INT);");
     return z;
 }
 
-char * db_queue_two(char *a, char *b){
-    char *z;
-    asprintf(&z,"%s%s",a,b);
-    return z;
-}
-
-char * db_queue_three(char *a, char *b, char *c){
-    char *z;
-    asprintf(&z,"%s%s%s",a,b,c);
-    return z;
-}
-
-char * db_create_table(char *a, char *b, char *c, char *d, char *e){
-    char *z;
-    asprintf(&z,"CREATE TABLE %s(%s TEXT, %s INT, %s INT, %s INT);", a, b, c, d, e);
-    return z;
-}
-
-char * db_insert_row(char *a, char *b, int c, int d, int e){
-    char *z;
-    asprintf(&z,"INSERT INTO %s VALUES(%s, %d, %d, %d);", a, b, c, d, e);
-    return z;
-}
-
-char * db_select_table(char *a){
-    char *z;
-    asprintf(&z,"SELECT * FROM %s;", a);
+char * db_select_all_ninja(){
+    char *z = "SELECT * FROM ninja;";
     return z;
 }
