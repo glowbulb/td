@@ -17,9 +17,9 @@ int main(int argc, char **argv) {
 
 //    db_query(db_queue_three(db_create_monsters(), db_insert_monsters(monsters, 5), db_select_table("monsters")));
 
-    struct ninja_t *result = db_select_ninja(db_select_table("monsters"));
+    struct ninja_t *r = db_select_ninja(db_select_table("ninja"));
 
-    ninjas_print(result);
+    ninjas_print(r);
 
     return 0;
 }
