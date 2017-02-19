@@ -16,47 +16,18 @@ int main(int argc, char **argv){
    float bouncer_dx = -4.0, bouncer_dy = 4.0;
    bool redraw = true;
  
-   if(!al_init()) {
-      fprintf(stderr, "failed to initialize allegro!\n");
-      return -1;
-   }
+   al_init()
  
    timer = al_create_timer(1.0 / FPS);
-   if(!timer) {
-      fprintf(stderr, "failed to create timer!\n");
-      return -1;
-   }
- 
    display = al_create_display(SCREEN_W, SCREEN_H);
-   if(!display) {
-      fprintf(stderr, "failed to create display!\n");
-      al_destroy_timer(timer);
-      return -1;
-   }
-
    bouncer = al_create_bitmap(BOUNCER_SIZE, BOUNCER_SIZE);
-   if(!bouncer) {
-      fprintf(stderr, "failed to create bouncer bitmap!\n");
-      al_destroy_display(display);
-      al_destroy_timer(timer);
-      return -1;
-   }
 
    al_set_target_bitmap(bouncer);
-
    al_clear_to_color(al_map_rgb(255, 0, 255));
-
    al_set_target_bitmap(al_get_backbuffer(display));
  
    event_queue = al_create_event_queue();
-   if(!event_queue) {
-      fprintf(stderr, "failed to create event_queue!\n");
-      al_destroy_bitmap(bouncer);
-      al_destroy_display(display);
-      al_destroy_timer(timer);
-      return -1;
-   }
- 
+
    al_register_event_source(event_queue, al_get_display_event_source(display));
  
    al_register_event_source(event_queue, al_get_timer_event_source(timer));

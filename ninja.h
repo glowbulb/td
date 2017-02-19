@@ -4,13 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <allegro5/allegro.h>
+#include <allegro5/allegro_image.h>
 #include "db.h"
-#include "render.h"
 
 #define CURRENT_KEYS 4
 
-// CREATE TABLE ninja (frame INT PRIMARY KEY, id INT xpos INT, ypos INT, life INT);
-// INSERT INTO ninja VALUES(1, 1, 10, 10, 100);
+// CREATE TABLE ninja (frame INT PRIMARY KEY, id INT, xpos INT, ypos INT, img INT, life INT);
+// INSERT INTO ninja VALUES(1, 1, 10, 10, 1, 100);
 
 // CREATE TABLE input (frame INT PRIMARY KEY, hash INT);
 // INSERT INTO input VALUES(1, 1000);
@@ -26,6 +27,7 @@ struct ninja_t {
     int id;
     int xpos;
     int ypos;
+    int img;
     int life;
 };
 
@@ -50,9 +52,9 @@ enum input_t {
     B = 100000
 };
 
-enum motion_t input_motion(int a){
+enum motion_t ninja_input_motion(int a){
     char *q = "";
-    asprintf(&q,"select input_lookup.motion from input inner join input_lookup on input.hash = input_lookup.hash where frame = %d;", a);
+    asprintf(&q,"SELECT input_lookup.motion FROM input INNER JOIN input_lookup ON input.hash = input_lookup.hash WHERE frame = %d;", a);
     sqlite3_stmt *r;
     sqlite3_open("td.db", &db);
     sqlite3_prepare_v2(db, q, -1, &r, 0);
@@ -75,12 +77,12 @@ int ninja_get_length(struct ninja_t *a){
 
 void ninja_print_array(struct ninja_t *a){
     for (int i = 0; i < ninja_get_length(a); i++) {
-        printf("%d %d %d %d %d\n", a[i].frame, a[i].id, a[i].xpos, a[i].ypos, a[i].life);
+        printf("%d %d %d %d %d %d\n", a[i].frame, a[i].id, a[i].xpos, a[i].ypos, a[i].img, a[i].life);
     }
 }
 
 void ninja_print(struct ninja_t a){
-    printf("%d %d %d %d %d\n", a.frame, a.id, a.xpos, a.ypos, a.life);
+    printf("%d %d %d %d %d %d\n", a.frame, a.id, a.xpos, a.ypos, a.img, a.life);
 }
 
 struct ninja_t * ninja_return(char *a){
@@ -96,7 +98,8 @@ struct ninja_t * ninja_return(char *a){
         e[i].id = sqlite3_column_int(r, 1);
         e[i].xpos = sqlite3_column_int(r, 2);
         e[i].ypos = sqlite3_column_int(r, 3);
-        e[i].life = sqlite3_column_int(r, 4);
+        e[i].img = sqlite3_column_int(r, 4);
+        e[i].life = sqlite3_column_int(r, 5);
         i++;
     }
     ninja_store_length(e, i);
@@ -117,30 +120,38 @@ char * ninja_insert_array(struct ninja_t *a){
     char *x = "";
     for (int i = 0; i < ninja_get_length(a); i++) {
         char *z;
-        asprintf(&z,"INSERT INTO ninja VALUES(%d, %d, %d, %d, %d);", a[i].frame, a[i].id, a[i].xpos, a[i].ypos, a[i].life);
+        asprintf(&z,"INSERT INTO ninja VALUES(%d, %d, %d, %d, %d, %d);", a[i].frame, a[i].id, a[i].xpos, a[i].ypos, a[i].img, a[i].life);
         asprintf(&x,"%s%s", x, z);
         free(z);
     }
     return x;
 }
 
-char * ninja_insert(struct ninja_t a){
-    char *x;
-    asprintf(&x, "INSERT INTO ninja VALUES(%d, %d, %d, %d, %d);", a.frame, a.id, a.xpos, a.ypos, a.life);
-    return x;
+void ninja_insert(struct ninja_t a){
+    sqlite3_stmt *r;
+    char *x = "";
+    asprintf(&x, "INSERT INTO ninja VALUES(%d, %d, %d, %d, %d, %d);", (a.frame + 1), a.id, a.xpos, a.ypos, a.img, a.life);
+    sqlite3_open("td.db", &db);
+    sqlite3_prepare_v2(db, x, -1, &r, 0);
+    sqlite3_step(r);
+    sqlite3_finalize(r);
+    sqlite3_close(db);
+    free(x);
 }
 
-void ninja_move(struct ninja_t a, enum motion_t b){
+struct ninja_t ninja_move(struct ninja_t a, enum motion_t b){
     if(b == WALK_RIGHT){
-        a.frame += 1;
         a.xpos += 10;
-        ninja_insert(a);
     }
+    if(b == WALK_LEFT){
+        a.xpos -= 10;
+    }
+    return a;
 }
 
 char * ninja_create(){
     char *z;
-    asprintf(&z,"CREATE TABLE ninja (frame INT PRIMARY KEY, id INT xpos INT, ypos INT, life INT);");
+    asprintf(&z,"CREATE TABLE ninja (frame INT PRIMARY KEY, id INT xpos INT, ypos INT, img INT, life INT);");
     return z;
 }
 
@@ -155,9 +166,16 @@ char * ninja_select_frame(int a){
     return z;
 }
 
-void ninja(int a){
-    struct ninja_t *b = ninja_return(ninja_select_frame(a));
-    for(int i = 0; i < ninja_get_length(b); i++){
-        ninja_move(b[i], input_motion(a));
+void ninja(int a, ALLEGRO_BITMAP *b){
+
+    struct ninja_t *c = ninja_return(ninja_select_frame(a));
+
+    for(int i = 0; i < ninja_get_length(c); i++){
+        al_draw_bitmap(b, c[i].xpos, c[i].ypos, 0);
+        al_flip_display();
+    }
+
+    for(int i = 0; i < ninja_get_length(c); i++){
+        ninja_insert(ninja_move(c[i], ninja_input_motion(a)));
     }
 }

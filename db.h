@@ -1,8 +1,10 @@
+#pragma once
 #define _GNU_SOURCE
-#import <sqlite3.h>
-#import <stdio.h>
-#import <stdlib.h>
-#import <string.h>
+#include <sqlite3.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "ninja.h"
 
 char * db_queue_two(char *a, char *b){
     char *z;
