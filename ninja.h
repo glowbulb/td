@@ -10,7 +10,7 @@
 
 #define CURRENT_KEYS 4
 
-// CREATE TABLE ninja (frame INT PRIMARY KEY, id INT, xpos INT, ypos INT, img INT, life INT);
+// CREATE TABLE ninja (frame INT, id INT, xpos INT, ypos INT, img INT, life INT);
 // INSERT INTO ninja VALUES(1, 1, 10, 10, 1, 100);
 
 // CREATE TABLE input (frame INT PRIMARY KEY, hash INT);
@@ -120,7 +120,7 @@ char * ninja_insert_array(struct ninja_t *a){
     char *x = "";
     for (int i = 0; i < ninja_get_length(a); i++) {
         char *z;
-        asprintf(&z,"INSERT INTO ninja VALUES(%d, %d, %d, %d, %d, %d);", a[i].frame, a[i].id, a[i].xpos, a[i].ypos, a[i].img, a[i].life);
+        asprintf(&z,"INSERT INTO ninja VALUES(%d, %d, %d, %d, %d, %d);", a[i].frame = a[i].frame + 1, a[i].id, a[i].xpos, a[i].ypos, a[i].img, a[i].life);
         asprintf(&x,"%s%s", x, z);
         free(z);
     }
@@ -130,13 +130,12 @@ char * ninja_insert_array(struct ninja_t *a){
 void ninja_insert(struct ninja_t a){
     sqlite3_stmt *r;
     char *x = "";
-    asprintf(&x, "INSERT INTO ninja VALUES(%d, %d, %d, %d, %d, %d);", (a.frame + 1), a.id, a.xpos, a.ypos, a.img, a.life);
+    asprintf(&x, "INSERT INTO ninja VALUES(%d, %d, %d, %d, %d, %d);", a.frame = a.frame + 1, a.id, a.xpos, a.ypos, a.img, a.life);
     sqlite3_open("td.db", &db);
     sqlite3_prepare_v2(db, x, -1, &r, 0);
     sqlite3_step(r);
     sqlite3_finalize(r);
     sqlite3_close(db);
-    free(x);
 }
 
 struct ninja_t ninja_move(struct ninja_t a, enum motion_t b){
@@ -166,16 +165,42 @@ char * ninja_select_frame(int a){
     return z;
 }
 
-void ninja(int a, ALLEGRO_BITMAP *b){
+void ninja_test(){
 
-    struct ninja_t *c = ninja_return(ninja_select_frame(a));
+    struct ninja_t a[1];
 
-    for(int i = 0; i < ninja_get_length(c); i++){
+    struct ninja_t n = {
+        .frame = 1,
+        .id = 1,
+        .xpos = 10,
+        .ypos = 10,
+        .img = 1,
+        .life = 100
+    };
+
+    a[0] = n;
+
+    for (int i = 0; i < 1; i++) {
+        printf("%d %d %d %d %d %d\n", a[i].frame, a[i].id, a[i].xpos, a[i].ypos, a[i].img, a[i].life);
+    }
+}
+
+void ninja(int e, ALLEGRO_BITMAP *b){
+
+    struct ninja_t *c = ninja_return(ninja_select_frame(e));
+
+    // for (int i = 0; i < 2; i++){
+    //     printf("TOTALLY REKT: %d", i);
+    //     ninja_insert(a[i]);
+    // }
+
+    for(int i = 0; i < 3; i++){
         al_draw_bitmap(b, c[i].xpos, c[i].ypos, 0);
         al_flip_display();
     }
 
-    for(int i = 0; i < ninja_get_length(c); i++){
-        ninja_insert(ninja_move(c[i], ninja_input_motion(a)));
+    sleep(3);
+    for(int i = 0; i < 3; i++){
+        ninja_insert(ninja_move(c[i], ninja_input_motion(e)));
     }
 }

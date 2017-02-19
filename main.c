@@ -33,26 +33,26 @@ int main(int argc, char **argv) {
     event_queue = al_create_event_queue();
     al_register_event_source(event_queue, al_get_display_event_source(display));
 
-    while (true) {
-        struct timespec start, end;
-        clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+//    struct timespec start, end;
 
-        frame++;
-        ALLEGRO_EVENT ev;
-        al_get_next_event(event_queue, &ev);
+//    ninja_test();
+
+//        clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+
+//        frame++;
+//        ALLEGRO_EVENT ev;
+//        al_get_next_event(event_queue, &ev);
 //        if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) { break; }
 
         ninja(frame, ninja_one);
-                
-        clock_gettime(CLOCK_MONOTONIC_RAW, &end);
-        uint64_t delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
-//        sleep(1);
         
-        sleep((1000000 - delta_us) / 1000000);
-    }
+//        clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+//        uint64_t delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
 
-    al_destroy_bitmap(ninja_one);
-    al_destroy_timer(timer);
+//        sleep((1000000 - delta_us) / 1000000);
+
+//    al_destroy_bitmap(ninja_one);
+
     al_destroy_display(display);
     al_destroy_event_queue(event_queue);
     return 0;
