@@ -1,0 +1,1 @@
+gcc -Wall bitmapMoving.c -o bitmapMoving -lallegro -lallegro_dialog -lallegro_image

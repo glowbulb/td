@@ -1,0 +1,1 @@
+gcc -Wall bouncing_doge.c -o bouncing_doge -lallegro -lallegro_dialog -lallegro_image

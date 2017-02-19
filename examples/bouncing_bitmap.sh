@@ -1,0 +1,1 @@
+gcc -Wall bouncing_bitmap.c -o bouncing_bitmap -lallegro -lallegro_dialog -lallegro_image
