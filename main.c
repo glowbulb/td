@@ -30,8 +30,8 @@ int main(int argc, char **argv) {
     ninja_img = al_load_bitmap("ninja.png");
     ninja_one = al_create_sub_bitmap(ninja_img , TILE_WIDTH , TILE_HEIGHT , TILE_WIDTH , TILE_HEIGHT);
     al_set_target_bitmap(al_get_backbuffer(display));
-    event_queue = al_create_event_queue();
-    al_register_event_source(event_queue, al_get_display_event_source(display));
+//    event_queue = al_create_event_queue();
+//    al_register_event_source(event_queue, al_get_display_event_source(display));
 
 //    struct timespec start, end;
 
@@ -54,6 +54,6 @@ int main(int argc, char **argv) {
 //    al_destroy_bitmap(ninja_one);
 
     al_destroy_display(display);
-    al_destroy_event_queue(event_queue);
+//    al_destroy_event_queue(event_queue);
     return 0;
 }

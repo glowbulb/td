@@ -165,34 +165,9 @@ char * ninja_select_frame(int a){
     return z;
 }
 
-void ninja_test(){
-
-    struct ninja_t a[1];
-
-    struct ninja_t n = {
-        .frame = 1,
-        .id = 1,
-        .xpos = 10,
-        .ypos = 10,
-        .img = 1,
-        .life = 100
-    };
-
-    a[0] = n;
-
-    for (int i = 0; i < 1; i++) {
-        printf("%d %d %d %d %d %d\n", a[i].frame, a[i].id, a[i].xpos, a[i].ypos, a[i].img, a[i].life);
-    }
-}
-
 void ninja(int e, ALLEGRO_BITMAP *b){
 
     struct ninja_t *c = ninja_return(ninja_select_frame(e));
-
-    // for (int i = 0; i < 2; i++){
-    //     printf("TOTALLY REKT: %d", i);
-    //     ninja_insert(a[i]);
-    // }
 
     for(int i = 0; i < 3; i++){
         al_draw_bitmap(b, c[i].xpos, c[i].ypos, 0);
