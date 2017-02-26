@@ -6,7 +6,6 @@
 #include <string.h>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
-#include "db.h"
 #define CURRENT_KEYS 4
 
 // CREATE TABLE ninja (frame INT, id INT, xpos INT, ypos INT, img INT, life INT, speed INT);
@@ -18,7 +17,7 @@
 // CREATE TABLE input_lookup (hash INT PRIMARY KEY, motion INT);
 // INSERT INTO input_lookup VALUES(1000, 02);
 
-sqlite3 *db;
+
 char *err_msg = 0;
 
 typedef struct {
@@ -69,6 +68,7 @@ typedef struct {
     char *c;
     motion_t m;
     ALLEGRO_BITMAP *b;
+    sqlite3 *db;
 } data_t;
 
 typedef struct {
@@ -79,23 +79,23 @@ typedef struct {
 typedef entity_s_t (*entity_map_t)(entity_s_t a, data_t b);
 typedef void (*entity_foreach_t)(entity_s_t a, data_t b);
 
-data_t entity_input_motion(data_t a){
-    char *q;
-    asprintf(&q,"SELECT input_lookup.motion FROM input INNER JOIN input_lookup ON input.hash = input_lookup.hash WHERE frame = %d;", a.i);
-    sqlite3_stmt *r;
-    sqlite3_open("td.db", &db);
-    sqlite3_prepare_v2(db, q, -1, &r, 0);
-    sqlite3_step(r);
-    data_t e = { 
-        .i = a.i,
-        .c = a.c,
-        .m = sqlite3_column_int(r, 0),
-        .b = a.b
-    };
-    sqlite3_finalize(r);
-    sqlite3_close(db);
-    return e;
-}
+// data_t entity_input_motion(data_t a){
+//     char *q;
+//     asprintf(&q,"SELECT input_lookup.motion FROM input INNER JOIN input_lookup ON input.hash = input_lookup.hash WHERE frame = %d;", a.i);
+//     sqlite3_stmt *r;
+//     sqlite3_open("td.db", &db);
+//     sqlite3_prepare_v2(db, q, -1, &r, 0);
+//     sqlite3_step(r);
+//     data_t e = { 
+//         .i = a.i,
+//         .c = a.c,
+//         .m = sqlite3_column_int(r, 0),
+//         .b = a.b
+//     };
+//     sqlite3_finalize(r);
+//     sqlite3_close(db);
+//     return e;
+// }
 
 void entity_print_f(entity_s_t a){
     printf("%d %d %d %d %d %d %d\n", a.frame, a.id, a.xpos, a.ypos, a.img, a.life, a.speed);
@@ -115,11 +115,10 @@ void entity_foreach(entity_t a, data_t b, entity_foreach_t c){
     }
 }
 
-entity_t entity_return(char *a){
+entity_t entity_return(char *a, data_t b){
     sqlite3_stmt *r;
     int i = 0;
-    sqlite3_open("td.db", &db);
-    sqlite3_prepare_v2(db, a, -1, &r, 0);
+    sqlite3_prepare_v2(b.db, a, -1, &r, 0);
     while (sqlite3_step(r) == SQLITE_ROW){ i++; }
     entity_t e = { .a = malloc(i * sizeof(entity_s_t)), .s = i };
     i = 0;
@@ -134,7 +133,6 @@ entity_t entity_return(char *a){
         i++;
     }
     sqlite3_finalize(r);
-    sqlite3_close(db);
     return e;
 }
 
@@ -144,16 +142,16 @@ int input_hash(input_keyboard_t *a){
     return b;
 }
 
-void entity_insert_f(entity_s_t a, data_t b){
-    sqlite3_stmt *r;
-    char *x = "";
-    asprintf(&x, "INSERT INTO %s VALUES(%d, %d, %d, %d, %d, %d, %d);", b.c, b.i + 1, a.id, a.xpos, a.ypos, a.img, a.life, a.speed);
-    sqlite3_open("td.db", &db);
-    sqlite3_prepare_v2(db, x, -1, &r, 0);
-    sqlite3_step(r);
-    sqlite3_finalize(r);
-    sqlite3_close(db);
-}
+// void entity_insert_f(entity_s_t a, data_t b){
+//     sqlite3_stmt *r;
+//     char *x = "";
+//     asprintf(&x, "INSERT INTO %s VALUES(%d, %d, %d, %d, %d, %d, %d);", b.c, b.i + 1, a.id, a.xpos, a.ypos, a.img, a.life, a.speed);
+//     sqlite3_open("td.db", &db);
+//     sqlite3_prepare_v2(db, x, -1, &r, 0);
+//     sqlite3_step(r);
+//     sqlite3_finalize(r);
+//     sqlite3_close(db);
+// }
 
 entity_s_t entity_move(entity_s_t a, data_t b){
     if(b.m == WALK_RIGHT){ a.xpos += a.speed; }
@@ -180,9 +178,12 @@ char * entity_select_frame(int a, char *b){
 }
 
 void entity_draw_f(entity_s_t a, data_t b){
+    
+    entity_print_f(a);
     al_draw_bitmap(b.b, a.xpos, a.ypos, 0);
     al_flip_display();
+    al_clear_to_color(al_map_rgb(0,0,0));
 }
 
 entity_foreach_t entity_draw = entity_draw_f;
-entity_foreach_t entity_insert = entity_insert_f;
+//entity_foreach_t entity_insert = entity_insert_f;
