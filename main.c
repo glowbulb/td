@@ -23,8 +23,9 @@ ALLEGRO_BITMAP *ninja_one = NULL;
 
 void render (data_t a){
     ninja(a);
-    sleep(5);
+    sleep(1);
     a.i += 1;
+    al_clear_to_color(al_map_rgb(0,0,0));
     render(a);
 }
 
@@ -35,11 +36,11 @@ int main(int argc, char **argv) {
     al_init_image_addon();
     ninja_img = al_load_bitmap("ninja.png");
 
-    data_t ninja_data = { .i = 1, .c = "ninja", .b = al_create_sub_bitmap(ninja_img , 0 , 0 , 32 , 32) };
+    data_t ninja_data = { .i = 1, .c = "ninja", .b = al_create_sub_bitmap(ninja_img, 0, 0, 32, 32) };
 
     al_set_target_bitmap(al_get_backbuffer(display));
 
-    ninja(ninja_data);
+    render(ninja_data);
 
     al_destroy_display(display);
 
