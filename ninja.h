@@ -16,7 +16,8 @@
 
 // ENTITY MAIN FUNCTION
 void ninja(data_t a){
-    entity_t *r = entity_return_frame(a);
-    entity_foreach(r, a, entity_draw);
-    entity_foreach(entity_insert_map(r, a), a, entity_insert);
+    entity_t *r = entity_return(entity_select_frame(a.i, a.c));
+    entity_foreach_(r, a, entity_print);
+//    entity_foreach(r, a, entity_draw);
+//    entity_foreach(r, a, entity_insert);
 }

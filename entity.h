@@ -9,8 +9,8 @@
 #include "db.h"
 #define CURRENT_KEYS 4
 
-// CREATE TABLE entity (frame INT, id INT, xpos INT, ypos INT, img INT, life INT, speed INT);
-// INSERT INTO entity VALUES(1, 1, 10, 10, 1, 100, 10);
+// CREATE TABLE ninja (frame INT, id INT, xpos INT, ypos INT, img INT, life INT, speed INT);
+// INSERT INTO ninja VALUES(1, 1, 10, 10, 1, 100, 10);
 
 // CREATE TABLE input (frame INT PRIMARY KEY, hash INT);
 // INSERT INTO input VALUES(1, 1000);
@@ -73,6 +73,7 @@ typedef struct {
 
 typedef entity_t (*entity_map_t)(entity_t a, data_t b);
 typedef void (*entity_foreach_t)(entity_t a, data_t b);
+typedef void (*entity_foreach__t)(entity_t a);
 
 data_t entity_input_motion(data_t a){
     char *q = "";
@@ -97,7 +98,7 @@ int entity_get_length(entity_t *a){
     return *x;
 }
 
-void entity_print(entity_t a, data_t b){
+void entity_print_f(entity_t a){
     printf("%d %d %d %d %d %d %d\n", a.frame, a.id, a.xpos, a.ypos, a.img, a.life, a.speed);
 }
 
@@ -114,6 +115,12 @@ void entity_foreach(entity_t *a, data_t b, entity_foreach_t c){
     const int l = entity_get_length(a);
     for(int i = 0; i < l; i++){
         c(a[i], b);
+    }
+}
+
+void entity_foreach_(entity_t *a, data_t b, entity_foreach__t c){
+    for(int i = 0; i < entity_get_length(a); i++){
+        c(a[i]);
     }
 }
 
@@ -176,14 +183,10 @@ char * entity_select_all(char *a){
     return z;
 }
 
-char * entity_select_frame(data_t a){
+char * entity_select_frame(int a, char *b){
     char *z;
-    asprintf(&z, "SELECT * FROM %s WHERE frame = %d;", a.c, a.i);
+    asprintf(&z, "SELECT * FROM %s WHERE frame = %d;", b, a);
     return z;
-}
-
-entity_t * entity_return_frame(data_t a){
-    return entity_return(entity_select_frame(a));
 }
 
 void entity_draw_f(entity_t a, data_t b){
@@ -196,4 +199,4 @@ entity_t * entity_insert_map(entity_t *a, data_t b){
 }
 
 entity_foreach_t entity_draw = entity_draw_f;
-entity_foreach_t entity_insert = entity_insert_f;
+entity_foreach__t entity_print = entity_print_f;
