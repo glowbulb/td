@@ -118,9 +118,9 @@ void entity_foreach(entity_t *a, data_t b, entity_foreach_t c){
     }
 }
 
-void entity_foreach_(entity_t *a, data_t b, entity_foreach__t c){
+void entity_foreach_(entity_t *a, entity_foreach__t b){
     for(int i = 0; i < entity_get_length(a); i++){
-        c(a[i]);
+        b(a[i]);
     }
 }
 
