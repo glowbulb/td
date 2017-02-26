@@ -159,8 +159,8 @@ void entity_insert_f(entity_t a, data_t b){
 }
 
 entity_t entity_move(entity_t a, data_t b){
-    if(b.m == WALK_RIGHT){ a.xpos += a.speed; }
-    if(b.m == WALK_LEFT){ a.xpos -= a.speed; }
+    if(b.m == WALK_RIGHT){ a.xpos += 10; }
+    if(b.m == WALK_LEFT){ a.xpos -= 10; }
     return a;
 }
 
